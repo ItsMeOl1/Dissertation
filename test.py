@@ -1,18 +1,26 @@
-import sys, pygame, pathfinder
+import sys, pygame, pathfinder, Enemy
 pygame.init()
 
+##SETTING UP THE DISPLAY
 screenSize = 1600, 900 
 squareSize = 50 #32x18
+RUNNING = True
+screen = pygame.display.set_mode(screenSize)
+
+##COLOUR CONSTANTS 
 dark_gray = 155, 155, 155
 light_gray = 200,200,200
 black = 0,0,0
 red = 255,0,0
 green = 0,255,0
-RUNNING = True
-screen = pygame.display.set_mode(screenSize)
 
+##LOAD IMAGES
 wall = pygame.image.load("wall.png")
 wall = pygame.transform.scale(wall, (50,50))
+
+##SET UP SPRITE GROUPS
+enemies = pygame.sprite.Group()
+enemies.add(Enemy.Arrow((0,0)))
 
 def drawOutlines(screen, colour, squareSize, screenSize):
     for x in range(squareSize, screenSize[0], squareSize):
@@ -58,13 +66,19 @@ class Map:
 
     def drawPath(self, screen, colour, squareSize):
         path = self.findPath()
+        self.setPath(path)
         for i in range(len(path)-1):
             start = (path[i][0] * squareSize + squareSize/2, path[i][1] * squareSize + squareSize/2)
             end = (path[i+1][0] * squareSize + squareSize/2, path[i+1][1] * squareSize + squareSize/2)
             pygame.draw.line(screen, colour, start, end)
-
+    
+    def setPath(self, path = None):
+        if path == None:
+            path = self.findPath()
+        Enemy.Enemy.path = path
 
 map = Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
+map.setPath()
 
 while RUNNING:
     for event in pygame.event.get():
@@ -74,7 +88,7 @@ while RUNNING:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                map.findPath()
+                enemies.add(Enemy.Arrow((0,0)))
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #if left click
@@ -82,7 +96,7 @@ while RUNNING:
             elif event.button == 3: #if right click
                 map.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
 
-    if RUNNING:
+    if RUNNING: #If 'x' button not clicked
         screen.fill(dark_gray)
         for x in range(0,screenSize[0],squareSize*2):
             for y in range(0,screenSize[1],squareSize*2):
@@ -92,9 +106,12 @@ while RUNNING:
                 pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
         pos = pygame.mouse.get_pos()
         pygame.draw.rect(screen, red, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize, squareSize, squareSize))
-        #screen.blit(ball, ballrect)
+        
 
         map.drawTiles(screen,squareSize)
         drawOutlines(screen, black, squareSize, screenSize)
         map.drawPath(screen, green, squareSize)
+
+        enemies.update(screen)
+
         pygame.display.flip()
