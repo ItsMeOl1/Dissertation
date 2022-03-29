@@ -1,17 +1,21 @@
-from pygame import sprite
+from pygame import sprite, transform
 from pygame import image as pyimage
 from math import cos, radians, sqrt
 
 class Tower(sprite.Sprite):
-    def __init__(self, towerGroup):
+    image = pyimage.load("tower.png")
+    image = transform.scale(image, (50,50))
+    def __init__(self, towerGroup, pos):
         sprite.Sprite.__init__(self)
         self.add(towerGroup)
+        self.rect = self.image.get_rect()
         self.type = "invalid"
         self.range = 0
         self.attack_damage = 0
         self.attack_speed = 0
         self.attack_cd = 100
         self.next_attack = 0
+        self.rect.topleft = pos
 
     def update(self, screen, bulletGroup):
         #add targeting
@@ -28,15 +32,15 @@ class Tower(sprite.Sprite):
 
 class Bullet(sprite.Sprite):
     image = pyimage.load("bullet.png")
-    rect = image.get_rect()
     def __init__(self, pos, damage, speed, angle, bulletGroup):
         sprite.Sprite.__init__(self)
+        self.rect = self.image.get_rect()
         self.add(bulletGroup)
         self.damage = damage
         self.speed = speed
         self.rect.center = pos
         dx = cos((radians(angle)))
-        dy = sqrt(speed ** 2 - dx ** 2)
+        dy = sqrt(self.speed ** 2 - dx ** 2)
         self.movement = (dx, dy)
 
     def update(self, screen, enemyGroup):
@@ -50,7 +54,7 @@ class Bullet(sprite.Sprite):
             self.rect.centerx += self.movement[0]/self.speed*i
             self.rect.centery += self.movement[1]/self.speed*i
             for enemy in enemyGroup:
-                if enemy.colliderect(self.rect):
+                if enemy.rect.colliderect(self.rect):
                     self.kill()
                     return enemy
 
@@ -60,6 +64,12 @@ class Bullet(sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect.topleft)
 
-
+class BasicTower(Tower):
+    def __init__(self, towerGroup, pos):
+        Tower.__init__(self, towerGroup, pos)
+        self.type = "Basic"
+        self.range = 300
+        self.attack_damage = 1
+        self.attack_speed = 10
         
 

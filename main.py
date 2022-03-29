@@ -1,4 +1,4 @@
-import sys, pygame, pathfinder, Enemy
+import pygame, pathfinder, Enemy, buildings
 pygame.init()
 
 ##SETTING UP THE DISPLAY
@@ -91,7 +91,10 @@ while RUNNING:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                enemies.add(Enemy.Arrow((0,0)))
+                Enemy.Arrow((0,0), enemies)
+            if event.key == pygame.K_t:
+                buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #if left click
@@ -116,5 +119,7 @@ while RUNNING:
         map.drawPath(screen, green, squareSize)
 
         enemies.update(screen)
+        towers.update(screen, bullets)
+        bullets.update(screen, enemies)
 
         pygame.display.flip()
