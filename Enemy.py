@@ -3,8 +3,9 @@ from pygame import image as pyimage
 
 class Enemy(sprite.Sprite):
     path = []
-    def __init__(self, startPos):
+    def __init__(self, startPos, enemyGroup):
         sprite.Sprite.__init__(self)
+        enemyGroup.add(self)
         self.pos = startPos
         self.nextDestination = 0
         self.speed = 1
@@ -75,8 +76,8 @@ class Enemy(sprite.Sprite):
 
 class Arrow(Enemy):
     image = pyimage.load("Enemy.png") #facing right by default
-    def __init__(self,startPos):
-        Enemy.__init__(self, startPos)
+    def __init__(self,startPos, enemyGroup):
+        Enemy.__init__(self, startPos, enemyGroup)
         self.rect = self.image.get_rect()
         self.rect.x = startPos[0] * 50
         self.rect.y = startPos[1] * 50

@@ -23,6 +23,9 @@ class Tower(sprite.Sprite):
     def shoot(self, angle, bulletGroup):
         Bullet (self.rect.center, self.attack_damage, self.attack_speed, angle, bulletGroup)
 
+    def draw(self, screen):
+        screen.blit(self.image, self.rect.topleft)
+
 class Bullet(sprite.Sprite):
     image = pyimage.load("bullet.png")
     rect = image.get_rect()
@@ -53,6 +56,9 @@ class Bullet(sprite.Sprite):
 
     def kill(self):
         sprite.Sprite.kill(self)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect.topleft)
 
 
         

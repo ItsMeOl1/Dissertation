@@ -20,7 +20,10 @@ wall = pygame.transform.scale(wall, (squareSize,squareSize))
 
 ##SET UP SPRITE GROUPS
 enemies = pygame.sprite.Group()
-enemies.add(Enemy.Arrow((0,0)))
+Enemy.Arrow((0,0), enemies)
+
+towers = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 
 def drawOutlines(screen, colour, squareSize, screenSize):
     for x in range(squareSize, screenSize[0], squareSize):
