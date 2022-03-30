@@ -1,3 +1,4 @@
+from turtle import color
 import pygame, pathfinder, Enemy, buildings
 pygame.init()
 
@@ -6,6 +7,7 @@ screenSize = 1600, 900
 squareSize = 50 #32x18
 RUNNING = True
 screen = pygame.display.set_mode(screenSize)
+clock = pygame.time.Clock()
 
 ##COLOUR CONSTANTS 
 dark_gray = 155, 155, 155
@@ -13,6 +15,7 @@ light_gray = 200,200,200
 black = 0,0,0
 red = 255,0,0
 green = 0,255,0
+FPS_font = pygame.font.SysFont("Arial", 10)
 
 ##LOAD IMAGES
 wall = pygame.image.load("wall.png")
@@ -31,14 +34,21 @@ def drawOutlines(screen, colour, squareSize, screenSize):
     for y in range(squareSize, screenSize[1], squareSize):
         pygame.draw.line(screen, colour, (0, y), (screenSize[0], y))
 
+def drawFPS():
+    text = str(int(clock.get_fps()))
+    fps = FPS_font.render(text, 0, pygame.Color("white"))
+    screen.blit(fps, (0, 0))
+
 class Map:
     def __init__(self, x, y):
         self.max_X = x-1
         self.max_Y = y-1
         self.start = 0,0
         self.end = self.max_X,self.max_Y
+        
 
         self.grid = [[0 for i in range(y)] for j in range(x)]
+        self.path = self.findPath()
     
     def set_start(self, x, y):
         if x <= self.max_X & y <= self.max_Y & x >= 0 & y >= 0:
@@ -65,14 +75,15 @@ class Map:
                     screen.blit(wall, (x*squareSize, y*squareSize))
 
     def findPath(self):
-        return pathfinder.astar(self.grid, self.start, self.end)
+        self.path = pathfinder.astar(self.grid, self.start, self.end)
+        self.setPath(self.path)
+        return self.path
 
     def drawPath(self, screen, colour, squareSize):
-        path = self.findPath()
-        self.setPath(path)
-        for i in range(len(path)-1):
-            start = (path[i][0] * squareSize + squareSize/2, path[i][1] * squareSize + squareSize/2)
-            end = (path[i+1][0] * squareSize + squareSize/2, path[i+1][1] * squareSize + squareSize/2)
+        self.setPath(self.path)
+        for i in range(len(self.path)-1):
+            start = (self.path[i][0] * squareSize + squareSize/2, self.path[i][1] * squareSize + squareSize/2)
+            end = (self.path[i+1][0] * squareSize + squareSize/2, self.path[i+1][1] * squareSize + squareSize/2)
             pygame.draw.line(screen, colour, start, end)
     
     def setPath(self, path = None):
@@ -84,6 +95,7 @@ map = Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
 map.setPath()
 
 while RUNNING:
+    clock.tick()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             pygame.quit()
@@ -92,15 +104,18 @@ while RUNNING:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 Enemy.Arrow((0,0), enemies)
-            if event.key == pygame.K_t:
+            elif event.key == pygame.K_t:
                 buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
+                map.findPath()
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #if left click
                 map.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                map.findPath()
             elif event.button == 3: #if right click
                 map.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                map.findPath()
 
     if RUNNING: #If 'x' button not clicked
         screen.fill(dark_gray)
@@ -119,7 +134,9 @@ while RUNNING:
         map.drawPath(screen, green, squareSize)
 
         enemies.update(screen)
-        towers.update(screen, bullets)
+        towers.update(screen, bullets, enemies)
         bullets.update(screen, enemies)
+
+        drawFPS()
 
         pygame.display.flip()

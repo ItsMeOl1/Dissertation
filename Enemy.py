@@ -1,4 +1,4 @@
-from pygame import sprite
+from pygame import sprite, transform
 from pygame import image as pyimage
 
 class Enemy(sprite.Sprite):
@@ -7,8 +7,9 @@ class Enemy(sprite.Sprite):
         sprite.Sprite.__init__(self)
         enemyGroup.add(self)
         self.pos = startPos
+        self.realpos = list(startPos)
         self.nextDestination = 0
-        self.speed = 1
+        self.speed = 0.5
         self.direction = 3 #8-direction with 1 being up
 
 
@@ -31,13 +32,14 @@ class Enemy(sprite.Sprite):
 
     def go(self, distance):
         if self.direction in [2,3,4]: #if going right
-            self.rect.x += distance
+            self.realpos[0] += distance
         elif self.direction in [6,7,8]: #if going left
-            self.rect.x -= distance
+            self.realpos[0] -= distance
         if self.direction in [1,2,8]: #if going up
-            self.rect.y -= distance
+            self.realpos[1] -= distance
         elif self.direction in [4,5,6]: #if going down
-            self.rect.y += distance
+            self.realpos[1] += distance
+        self.rect.center = self.realpos
     
     def kill(self):
         sprite.Sprite.kill(self)
@@ -61,21 +63,22 @@ class Enemy(sprite.Sprite):
         
     def atDestination(self):
         if self.direction in [2,3,4]: #if going right
-            if self.rect.x >= self.path[self.nextDestination][0]*50 + 25:
+            if self.rect.centerx >= self.path[self.nextDestination][0]*50 + 25:
                 return True
         elif self.direction in [6,7,8]: #if going left
-            if self.rect.x <= self.path[self.nextDestination][0]*50 + 25:
+            if self.rect.centerx <= self.path[self.nextDestination][0]*50 + 25:
                 return True
         if self.direction in [1,2,8]: #if going up
-            if self.rect.y <= self.path[self.nextDestination][1]*50 + 25:
+            if self.rect.centery <= self.path[self.nextDestination][1]*50 + 25:
                 return True
         elif self.direction in [4,5,6]: #if going down
-            if self.rect.y >= self.path[self.nextDestination][1]*50 + 25:
+            if self.rect.centery >= self.path[self.nextDestination][1]*50 + 25:
                 return True
         return False
 
 class Arrow(Enemy):
     image = pyimage.load("Enemy.png") #facing right by default
+    image = transform.scale(image, (30,30))
     def __init__(self,startPos, enemyGroup):
         Enemy.__init__(self, startPos, enemyGroup)
         self.rect = self.image.get_rect()
