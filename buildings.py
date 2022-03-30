@@ -91,7 +91,7 @@ class BasicTower(Tower):
         self.type = "Basic"
         self.range = 1000
         self.attack_damage = 1
-        self.attack_speed = 5 #minimum 3!
+        self.attack_speed = 1
         self.attack_cd = 50
         self.towerGunImage = self.towerTurret
         self.towerGunRect = self.towerGunImage.get_rect()
@@ -119,12 +119,6 @@ class BasicTower(Tower):
                     self.angle *= -1
                 elif dy > 0 and dx < 0: #below and to right
                     self.angle -= 180
-
-
-                
-
-                    
-                
                 self.towerGunImage = transform.rotate(self.towerTurret, self.angle)
                 self.towerGunRect = self.towerGunImage.get_rect()
                 self.towerGunRect.center = self.rect.center

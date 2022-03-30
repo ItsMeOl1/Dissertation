@@ -91,4 +91,5 @@ class Arrow(Enemy):
         self.rect.x = startPos[0] * 50
         self.rect.y = startPos[1] * 50
         self.setDirection(3)
+        self.rect.y = 100
     
