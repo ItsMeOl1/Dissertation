@@ -1,5 +1,5 @@
 from turtle import color
-import pygame, pathfinder, Enemy, buildings
+import pygame, pathfinder, enemy, buildings
 pygame.init()
 
 ##SETTING UP THE DISPLAY
@@ -18,12 +18,12 @@ green = 0,255,0
 FPS_font = pygame.font.SysFont("Arial", 10)
 
 ##LOAD IMAGES
-wall = pygame.image.load("wall.png")
+wall = pygame.image.load("Sprites/Towers/wall.png")
 wall = pygame.transform.scale(wall, (squareSize,squareSize))
 
 ##SET UP SPRITE GROUPS
 enemies = pygame.sprite.Group()
-Enemy.Arrow((0,0), enemies)
+enemy.Arrow((0,0), enemies)
 
 towers = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -89,7 +89,7 @@ class Map:
     def setPath(self, path = None):
         if path == None:
             path = self.findPath()
-        Enemy.Enemy.path = path
+        enemy.Enemy.path = path
 
 map = Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
 map.setPath()
@@ -103,7 +103,7 @@ while RUNNING:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                Enemy.Arrow((0,0), enemies)
+                enemy.Arrow((0,0), enemies)
             elif event.key == pygame.K_t:
                 buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
                 map.findPath()

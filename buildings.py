@@ -3,7 +3,7 @@ from pygame import image as pyimage
 from math import sin, atan, radians, sqrt
 
 class Tower(sprite.Sprite):
-    image = pyimage.load("tower.png")
+    image = pyimage.load("Sprites/Towers/tower.png")
     image = transform.scale(image, (50,50))
     def __init__(self, towerGroup, pos):
         sprite.Sprite.__init__(self)
@@ -38,7 +38,7 @@ class Tower(sprite.Sprite):
         screen.blit(self.image, self.rect.topleft)
 
 class Bullet(sprite.Sprite):
-    image = pyimage.load("bullet.png")
+    image = pyimage.load("Sprites/bullet.png")
     def __init__(self, pos, damage, speed, dy, dx, bulletGroup):
         sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()

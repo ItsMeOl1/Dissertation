@@ -77,7 +77,7 @@ class Enemy(sprite.Sprite):
         return False
 
 class Arrow(Enemy):
-    image = pyimage.load("Enemy.png") #facing right by default
+    image = pyimage.load("Sprites/Enemies/Arrow.png") #facing right by default
     image = transform.scale(image, (30,30))
     def __init__(self,startPos, enemyGroup):
         Enemy.__init__(self, startPos, enemyGroup)
