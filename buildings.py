@@ -1,6 +1,6 @@
 from pygame import sprite, transform
 from pygame import image as pyimage
-from math import sin, atan, radians, sqrt
+from math import atan, degrees, sqrt
 
 class Tower(sprite.Sprite):
     image = pyimage.load("Sprites/Towers/tower.png")
@@ -21,7 +21,6 @@ class Tower(sprite.Sprite):
         self.draw(screen)
         self.next_attack -= 1
         if self.next_attack < 1:
-            angle = None
             for i in enemyGroup:
                 dx = i.rect.centerx - self.rect.centerx
                 dy = i.rect.centery - self.rect.centery
@@ -83,6 +82,10 @@ class Bullet(sprite.Sprite):
         screen.blit(self.image, self.rect.topleft)
 
 class BasicTower(Tower):
+    image = pyimage.load("Sprites/Towers/tower.png")
+    towerTurret = pyimage.load("Sprites/Towers/towerGun.png")
+    image = transform.scale(image, (50,50))
+    towerTurret = transform.scale(towerTurret, (60,60))
     def __init__(self, towerGroup, pos):
         Tower.__init__(self, towerGroup, pos)
         self.type = "Basic"
@@ -90,5 +93,44 @@ class BasicTower(Tower):
         self.attack_damage = 1
         self.attack_speed = 5 #minimum 3!
         self.attack_cd = 50
+        self.towerGunImage = self.towerTurret
+        self.towerGunRect = self.towerGunImage.get_rect()
+        self.towerGunRect.center = self.rect.center
+        self.angle = 0
+
+    def update(self, screen, bulletGroup, enemyGroup):
+        self.draw(screen)
+        self.next_attack -= 1
+        targetted = False
+        for i in enemyGroup:
+            dx = i.rect.centerx - self.rect.centerx
+            dy = i.rect.centery - self.rect.centery
+            dist = sqrt(dx**2 + dy**2)
+            if dist < self.range:
+                targetted = True
+                if self.next_attack < 1:
+                    self.next_attack = self.attack_cd
+                    self.shoot(dy, dx, bulletGroup)
+                if dy == 0:
+                    dy = 0.001
+                self.angle = degrees(atan(dx/dy))
+                if dy > 0 and dx > -0.001: #below and to right (needs to include dx = 0 ie straight down)
+                    self.angle = 180 - self.angle
+                    self.angle *= -1
+                elif dy > 0 and dx < 0: #below and to right
+                    self.angle -= 180
+
+
+                
+
+                    
+                
+                self.towerGunImage = transform.rotate(self.towerTurret, self.angle)
+                self.towerGunRect = self.towerGunImage.get_rect()
+                self.towerGunRect.center = self.rect.center
+                screen.blit(self.towerGunImage, self.towerGunRect.topleft)
+                break
+        if not targetted:
+            screen.blit(self.towerGunImage, self.towerGunRect.topleft)
         
 

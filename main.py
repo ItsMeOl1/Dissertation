@@ -16,10 +16,17 @@ black = 0,0,0
 red = 255,0,0
 green = 0,255,0
 FPS_font = pygame.font.SysFont("Arial", 10)
+mouseposSurface = pygame.Surface((squareSize, squareSize))
+mouseposSurface.fill(red)
+mouseposSurface.set_alpha(15)
 
 ##LOAD IMAGES
 wall = pygame.image.load("Sprites/Towers/wall.png")
 wall = pygame.transform.scale(wall, (squareSize,squareSize))
+wall_images = {"top": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_top.png"), (squareSize,squareSize)),
+               "middle": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_middle.png"), (squareSize,squareSize)),
+               "bottom": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_bottom.png"), (squareSize,squareSize*1.4)),
+               "alone": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_alone.png"), (squareSize,squareSize*1.4))}
 
 ##SET UP SPRITE GROUPS
 enemies = pygame.sprite.Group()
@@ -71,8 +78,22 @@ class Map:
     def drawTiles(self, screen, squareSize):
         for x in range(len(self.grid)):
             for y in range(len(self.grid[x])):
+                top = False
+                bottom = False
                 if self.grid[x][y] == 1:
-                    screen.blit(wall, (x*squareSize, y*squareSize))
+                    if y == 0 or self.grid[x][y-1] == 0:
+                        top = True
+                    if y == (screenSize[1]/squareSize)-1 or self.grid[x][y+1] == 0:
+                        bottom = True
+                    if top and bottom:
+                        screen.blit(wall_images["alone"], (x*squareSize, y*squareSize))
+                    elif top:
+                        screen.blit(wall_images["top"], (x*squareSize, y*squareSize))
+                    elif bottom:
+                        screen.blit(wall_images["bottom"], (x*squareSize, y*squareSize))
+                    else:
+                        screen.blit(wall_images["middle"], (x*squareSize, y*squareSize))
+                    
 
     def findPath(self):
         self.path = pathfinder.astar(self.grid, self.start, self.end)
@@ -106,6 +127,8 @@ while RUNNING:
                 enemy.Arrow((0,0), enemies)
             elif event.key == pygame.K_t:
                 buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
+                pos = pygame.mouse.get_pos()
+                map.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
                 map.findPath()
 
 
@@ -125,16 +148,19 @@ while RUNNING:
         for x in range(squareSize,screenSize[0],squareSize*2):
             for y in range(squareSize,screenSize[1],squareSize*2):
                 pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
-        pos = pygame.mouse.get_pos()
-        pygame.draw.rect(screen, red, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize, squareSize, squareSize))
+        
         
 
         map.drawTiles(screen,squareSize)
         drawOutlines(screen, black, squareSize, screenSize)
         map.drawPath(screen, green, squareSize)
+        pos = pygame.mouse.get_pos()
+        
 
         enemies.update(screen)
         towers.update(screen, bullets, enemies)
+        screen.blit(mouseposSurface, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize, squareSize, squareSize))
+
         bullets.update(screen, enemies)
 
         drawFPS()

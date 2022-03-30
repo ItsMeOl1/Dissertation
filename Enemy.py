@@ -9,9 +9,8 @@ class Enemy(sprite.Sprite):
         self.pos = startPos
         self.realpos = list(startPos)
         self.nextDestination = 0
-        self.speed = 0.5
+        self.speed = 1
         self.direction = 3 #8-direction with 1 being up
-
 
     def update(self, screen):
         self.move()
@@ -60,7 +59,13 @@ class Enemy(sprite.Sprite):
         elif self.path[self.nextDestination-1][1] > self.path[self.nextDestination][1]:
             direction[1] = 1
         self.direction = {"[0, 1]": 1, "[1, 1]": 2, "[1, 0]": 3, "[1, -1]": 4, "[0, -1]": 5, "[-1, 1]": 6, "[-1, 0]": 7, "[-1, -1]": 8}[str(direction)]
-        
+
+        self.image = transform.rotate(self.oimage, (self.direction-1) * -45)
+
+    def setDirection(self, direction):
+        self.direction = direction
+        self.image = transform.rotate(self.oimage, (self.direction-1) * -45)  
+
     def atDestination(self):
         if self.direction in [2,3,4]: #if going right
             if self.rect.centerx >= self.path[self.nextDestination][0]*50 + 25:
@@ -77,11 +82,13 @@ class Enemy(sprite.Sprite):
         return False
 
 class Arrow(Enemy):
-    image = pyimage.load("Sprites/Enemies/Arrow.png") #facing right by default
-    image = transform.scale(image, (30,30))
+    oimage = pyimage.load("Sprites/Enemies/arrow.png") #facing right by default
+    oimage = transform.scale(oimage, (30,30))
     def __init__(self,startPos, enemyGroup):
         Enemy.__init__(self, startPos, enemyGroup)
+        self.image = self.oimage
         self.rect = self.image.get_rect()
         self.rect.x = startPos[0] * 50
         self.rect.y = startPos[1] * 50
+        self.setDirection(3)
     
