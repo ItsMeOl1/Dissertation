@@ -1,5 +1,4 @@
-from turtle import color
-import pygame, pathfinder, enemy, buildings
+import pygame, enemy, buildings, map
 pygame.init()
 
 ##SETTING UP THE DISPLAY
@@ -20,14 +19,6 @@ mouseposSurface = pygame.Surface((squareSize, squareSize))
 mouseposSurface.fill(red)
 mouseposSurface.set_alpha(15)
 
-##LOAD IMAGES
-wall = pygame.image.load("Sprites/Towers/wall.png")
-wall = pygame.transform.scale(wall, (squareSize,squareSize))
-wall_images = {"top": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_top.png"), (squareSize,squareSize)),
-               "middle": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_middle.png"), (squareSize,squareSize)),
-               "bottom": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_bottom.png"), (squareSize,squareSize*1.4)),
-               "alone": pygame.transform.scale(pygame.image.load("Sprites/Towers/wall_alone.png"), (squareSize,squareSize*1.4))}
-
 ##SET UP SPRITE GROUPS
 enemies = pygame.sprite.Group()
 enemy.Arrow((0,0), enemies)
@@ -46,74 +37,10 @@ def drawFPS():
     fps = FPS_font.render(text, 0, pygame.Color("white"))
     screen.blit(fps, (0, 0))
 
-class Map:
-    def __init__(self, x, y):
-        self.max_X = x-1
-        self.max_Y = y-1
-        self.start = 0,0
-        self.end = self.max_X,self.max_Y
-        
 
-        self.grid = [[0 for i in range(y)] for j in range(x)]
-        self.path = self.findPath()
-    
-    def set_start(self, x, y):
-        if x <= self.max_X & y <= self.max_Y & x >= 0 & y >= 0:
-            self.start = x,y
-        else:
-            print("INVALID start set")
 
-    def set_end(self, x, y):
-        if x <= self.max_X & y <= self.max_Y:
-            self.end = x,y
-        else:
-            print("INVALID end set")
-
-    def place(self, x, y):
-        self.grid[x][y] = 1
-
-    def clear(self, x, y):
-        self.grid[x][y] = 0
-
-    def drawTiles(self, screen, squareSize):
-        for x in range(len(self.grid)):
-            for y in range(len(self.grid[x])):
-                top = False
-                bottom = False
-                if self.grid[x][y] == 1:
-                    if y == 0 or self.grid[x][y-1] == 0:
-                        top = True
-                    if y == (screenSize[1]/squareSize)-1 or self.grid[x][y+1] == 0:
-                        bottom = True
-                    if top and bottom:
-                        screen.blit(wall_images["alone"], (x*squareSize, y*squareSize))
-                    elif top:
-                        screen.blit(wall_images["top"], (x*squareSize, y*squareSize))
-                    elif bottom:
-                        screen.blit(wall_images["bottom"], (x*squareSize, y*squareSize))
-                    else:
-                        screen.blit(wall_images["middle"], (x*squareSize, y*squareSize))
-                    
-
-    def findPath(self):
-        self.path = pathfinder.astar(self.grid, self.start, self.end)
-        self.setPath(self.path)
-        return self.path
-
-    def drawPath(self, screen, colour, squareSize):
-        self.setPath(self.path)
-        for i in range(len(self.path)-1):
-            start = (self.path[i][0] * squareSize + squareSize/2, self.path[i][1] * squareSize + squareSize/2)
-            end = (self.path[i+1][0] * squareSize + squareSize/2, self.path[i+1][1] * squareSize + squareSize/2)
-            pygame.draw.line(screen, colour, start, end)
-    
-    def setPath(self, path = None):
-        if path == None:
-            path = self.findPath()
-        enemy.Enemy.path = path
-
-map = Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
-map.setPath()
+levelmap = map.Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
+levelmap.setPath()
 
 while RUNNING:
     clock.tick()
@@ -128,17 +55,17 @@ while RUNNING:
             elif event.key == pygame.K_t:
                 buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
                 pos = pygame.mouse.get_pos()
-                map.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
-                map.findPath()
+                levelmap.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
+                levelmap.findPath()
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #if left click
-                map.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                map.findPath()
+                levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                levelmap.findPath()
             elif event.button == 3: #if right click
-                map.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                map.findPath()
+                levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                levelmap.findPath()
 
     if RUNNING: #If 'x' button not clicked
         screen.fill(dark_gray)
@@ -151,9 +78,9 @@ while RUNNING:
         
         
 
-        map.drawTiles(screen,squareSize)
+        levelmap.drawTiles(screen,squareSize, screenSize)
         drawOutlines(screen, black, squareSize, screenSize)
-        map.drawPath(screen, green, squareSize)
+        levelmap.drawPath(screen, green, squareSize)
         pos = pygame.mouse.get_pos()
         
 
