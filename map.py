@@ -16,6 +16,9 @@ class Map:
 
         self.grid = [[0 for i in range(y)] for j in range(x)]
         self.path = self.findPath()
+
+        self.resource_clay_location = None
+        self.resource_clay_amount = 0
     
     def set_start(self, x, y):
         if x <= self.max_X & y <= self.max_Y & x >= 0 & y >= 0:
@@ -54,7 +57,6 @@ class Map:
                     else:
                         screen.blit(wall_images["middle"], (x*squareSize, y*squareSize))
                     
-
     def findPath(self):
         self.path = pathfinder.astar(self.grid, self.start, self.end)
         self.setPath(self.path)
