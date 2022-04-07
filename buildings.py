@@ -6,7 +6,7 @@ class Tower(sprite.Sprite):
     image = pyimage.load("Sprites/Towers/tower.png")
     image = transform.scale(image, (50,50))
     def __init__(self, towerGroup, pos):
-        sprite.Sprite.__init__(self)
+        super().__init__()
         self.add(towerGroup)
         self.rect = self.image.get_rect()
         self.type = "invalid"
@@ -39,7 +39,7 @@ class Tower(sprite.Sprite):
 class Bullet(sprite.Sprite):
     image = pyimage.load("Sprites/bullet.png")
     def __init__(self, pos, damage, speed, dy, dx, bulletGroup):
-        sprite.Sprite.__init__(self)
+        super().__init__()
         self.rect = self.image.get_rect()
         self.add(bulletGroup)
         self.damage = damage

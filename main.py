@@ -9,19 +9,18 @@ screen = pygame.display.set_mode(screenSize)
 clock = pygame.time.Clock()
 
 ##COLOUR CONSTANTS 
-dark_gray = 155, 155, 155
-light_gray = 200,200,200
-black = 0,0,0
 red = 255,0,0
 green = 0,255,0
 FPS_font = pygame.font.SysFont("Arial", 10)
 mouseposSurface = pygame.Surface((squareSize, squareSize))
 mouseposSurface.fill(red)
 mouseposSurface.set_alpha(15)
+background = pygame.image.load("Sprites/Floors/grass.png")
+background = pygame.transform.scale(background, (1600,900))
 
 ##SET UP SPRITE GROUPS
 enemies = pygame.sprite.Group()
-enemy.Arrow((0,0), enemies)
+enemy.Squirrel((0,0), enemies)
 
 towers = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -37,6 +36,17 @@ def drawFPS():
     fps = FPS_font.render(text, 0, pygame.Color("white"))
     screen.blit(fps, (0, 0))
 
+def drawBackground():
+    #screen.fill(dark_gray)
+    #for x in range(0,screenSize[0],squareSize*2):
+    #    for y in range(0,screenSize[1],squareSize*2):
+    #        pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
+    #for x in range(squareSize,screenSize[0],squareSize*2):
+    #    for y in range(squareSize,screenSize[1],squareSize*2):
+    #        pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
+
+    screen.blit(background, (0,0))
+
 
 
 levelmap = map.Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
@@ -51,7 +61,7 @@ while RUNNING:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                enemy.Arrow((0,0), enemies)
+                enemy.Squirrel((0,0), enemies)
             elif event.key == pygame.K_t:
                 buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
                 pos = pygame.mouse.get_pos()
@@ -68,18 +78,10 @@ while RUNNING:
                 levelmap.findPath()
 
     if RUNNING: #If 'x' button not clicked
-        screen.fill(dark_gray)
-        for x in range(0,screenSize[0],squareSize*2):
-            for y in range(0,screenSize[1],squareSize*2):
-                pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
-        for x in range(squareSize,screenSize[0],squareSize*2):
-            for y in range(squareSize,screenSize[1],squareSize*2):
-                pygame.draw.rect(screen, light_gray , (x, y, squareSize, squareSize))
         
-        
-
+        drawBackground()
         levelmap.drawTiles(screen,squareSize, screenSize)
-        drawOutlines(screen, black, squareSize, screenSize)
+        #drawOutlines(screen, black, squareSize, screenSize)
         levelmap.drawPath(screen, green, squareSize)
         pos = pygame.mouse.get_pos()
         
