@@ -1,4 +1,4 @@
-import pygame, enemy, buildings, map
+import pygame, enemy, buildings, map, ui
 pygame.init()
 
 ##SETTING UP THE DISPLAY
@@ -47,7 +47,7 @@ def drawBackground():
 
     screen.blit(background, (0,0))
 
-
+UI = ui.UI()
 
 levelmap = map.Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
 levelmap.setPath()
@@ -70,18 +70,19 @@ while RUNNING:
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1: #if left click
-                levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                levelmap.findPath()
-            elif event.button == 3: #if right click
-                levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                levelmap.findPath()
+            if not UI.updateClick(event.pos): #if not clicking on UI
+                if event.button == 1: #if left click
+                    levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                    levelmap.findPath()
+                elif event.button == 3: #if right click
+                    levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+                    levelmap.findPath()
 
     if RUNNING: #If 'x' button not clicked
         
         drawBackground()
         levelmap.drawTiles(screen,squareSize, screenSize)
-        #drawOutlines(screen, black, squareSize, screenSize)
+        #drawOutlines(screen, (0,0,0) , squareSize, screenSize)
         levelmap.drawPath(screen, green, squareSize)
         pos = pygame.mouse.get_pos()
         
@@ -91,6 +92,9 @@ while RUNNING:
         screen.blit(mouseposSurface, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize, squareSize, squareSize))
 
         bullets.update(screen, enemies)
+
+        UI.update(pos)
+        UI.draw(screen)
 
         drawFPS()
 
