@@ -4,7 +4,7 @@ class UI:
     def __init__(self):
         self.open = False
         self.open_amount = 0
-        self.open_speed = 5
+        self.open_speed = 1.3
 
         openButtonImage = pygame.transform.scale(pygame.image.load("Sprites/UI/Pullout.png"), (50,100))
         openButtonHover = pygame.transform.scale(pygame.image.load("Sprites/UI/PulloutHover.png"), (50,100))
@@ -32,24 +32,24 @@ class UI:
         else:
             self.openButton.set_hover(False)
 
-        if self.open and self.open_amount < 100:
+        if self.open and self.open_amount < 90:
             self.move()
         elif (not self.open) and self.open_amount > 0:
             self.move()
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
         self.openButton.draw(screen)
+        screen.blit(self.image, self.rect)
 
     def move(self):
         if self.open:
             self.open_amount += self.open_speed
-            self.rect.x -= self.open_speed
-            self.openButton.rect.x -= self.open_speed
+            self.rect.x = 1600- self.open_amount
+            self.openButton.rect.x = 1600- self.open_amount -50
         else:
             self.open_amount -= self.open_speed
-            self.rect.x += self.open_speed
-            self.openButton.rect.x += self.open_speed
+            self.rect.x = 1600- self.open_amount
+            self.openButton.rect.x = 1600- self.open_amount-50
 
     def get_hit(self, point):
         return self.rect.collidepoint(point)
