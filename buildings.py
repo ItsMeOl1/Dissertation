@@ -54,8 +54,10 @@ class Bullet(sprite.Sprite):
 
         self.movement = (dx, dy)
 
-    def update(self, screen, enemyGroup):
-        self.move(enemyGroup)
+    def update(self, screen, enemyGroup, ticks):
+        while ticks > 0:
+            self.move(enemyGroup)
+            ticks -= 1
         if self.rect.centerx < -50 or self.rect.centerx > 1650: #hardcoded!!! TODO
                 self.kill()
         elif self.rect.centery < -50 or self.rect.centery > 950: #hardcoded!!! TODO
@@ -98,9 +100,9 @@ class BasicTower(Tower):
         self.towerGunRect.center = self.rect.center
         self.angle = 0
 
-    def update(self, screen, bulletGroup, enemyGroup):
+    def update(self, screen, bulletGroup, enemyGroup, ticks):
         self.draw(screen)
-        self.next_attack -= 1
+        self.next_attack -= ticks
         targetted = False
         for i in enemyGroup:
             dx = i.rect.centerx - self.rect.centerx
@@ -108,8 +110,8 @@ class BasicTower(Tower):
             dist = sqrt(dx**2 + dy**2)
             if dist < self.range:
                 targetted = True
-                if self.next_attack < 1:
-                    self.next_attack = self.attack_cd
+                while self.next_attack <= 0:
+                    self.next_attack += self.attack_cd
                     self.shoot(dy, dx, bulletGroup)
                 if dy == 0:
                     dy = 0.001
