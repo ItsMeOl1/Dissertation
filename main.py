@@ -1,4 +1,4 @@
-import pygame, enemy, buildings, map
+import pygame, enemy, buildings, map, ui
 pygame.init()
 
 ##SETTING UP THE DISPLAY
@@ -47,7 +47,7 @@ def drawBackground():
 
     screen.blit(background, (0,0))
 
-
+UI = ui.UI()
 
 levelmap = map.Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
 levelmap.setPath()
@@ -59,38 +59,72 @@ while RUNNING:
             pygame.quit()
             RUNNING = False
 
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                enemy.Squirrel((0,0), enemies)
-            elif event.key == pygame.K_t:
-                buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
-                pos = pygame.mouse.get_pos()
-                levelmap.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
-                levelmap.findPath()
+    
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+             UI.updateClick(event.pos)
 
 
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1: #if left click
-                levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                levelmap.findPath()
-            elif event.button == 3: #if right click
-                levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-                levelmap.findPath()
+        #     elif event.key == pygame.K_t:
+        #         buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
+        #         pos = pygame.mouse.get_pos()
+        #         levelmap.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
+        #         levelmap.findPath()
+
+
+        # elif event.type == pygame.MOUSEBUTTONUP:
+        #     if not UI.updateClick(event.pos): #if not clicking on UI
+        #         if event.button == 1: #if left click
+        #             levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+        #             levelmap.findPath()
+        #         elif event.button == 3: #if right click
+        #             levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
+        #             levelmap.findPath()
 
     if RUNNING: #If 'x' button not clicked
-        
+
+        keys = pygame.key.get_pressed()
+        mouseButtons = pygame.mouse.get_pressed()
+        mousePos = pygame.mouse.get_pos()
+
+        if mouseButtons[0] and not UI.collision(mousePos):
+            if UI.selected is not None: 
+                xblock = int(event.pos[0]/squareSize)
+                yblock = int(event.pos[1]/squareSize)
+                if UI.selected == "wall":
+                    levelmap.place(xblock, yblock)
+                    if not levelmap.findPath():
+                        levelmap.clear(xblock, yblock)
+                        levelmap.findPath()
+                elif levelmap.get_block(xblock, yblock) == 1: ##if clicked on a wall
+                    if UI.selected == "bomb":
+                        levelmap.clear(xblock, yblock)
+                    elif UI.selected == "tower1":
+                        buildings.BasicTower(towers, (xblock*squareSize, yblock*squareSize))
+                        levelmap.place(xblock, yblock, 2)
+                elif levelmap.get_block(xblock, yblock) > 1:
+                    if UI.selected == "bomb":
+                        for tower in towers:
+                            print(tower.rect.center)
+                            if tower.rect.collidepoint(mousePos):
+                                tower.kill()
+                                break
+                        levelmap.clear(xblock, yblock)
+
         drawBackground()
         levelmap.drawTiles(screen,squareSize, screenSize)
-        #drawOutlines(screen, black, squareSize, screenSize)
+        #drawOutlines(screen, (0,0,0) , squareSize, screenSize)
         levelmap.drawPath(screen, green, squareSize)
-        pos = pygame.mouse.get_pos()
+        
         
 
         enemies.update(screen)
         towers.update(screen, bullets, enemies)
-        screen.blit(mouseposSurface, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize, squareSize, squareSize))
+        screen.blit(mouseposSurface, (int(mousePos[0]/squareSize)*squareSize, int(mousePos[1]/squareSize)*squareSize, squareSize, squareSize))
 
         bullets.update(screen, enemies)
+
+        UI.update(mousePos)
+        UI.draw(screen)
 
         drawFPS()
 

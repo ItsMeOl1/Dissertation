@@ -16,6 +16,9 @@ class Map:
 
         self.grid = [[0 for i in range(y)] for j in range(x)]
         self.path = self.findPath()
+
+        self.resource_clay_location = None
+        self.resource_clay_amount = 0
     
     def set_start(self, x, y):
         if x <= self.max_X & y <= self.max_Y & x >= 0 & y >= 0:
@@ -29,18 +32,21 @@ class Map:
         else:
             print("INVALID end set")
 
-    def place(self, x, y):
-        self.grid[x][y] = 1
+    def place(self, x, y, type = 1):
+        self.grid[x][y] = type
 
     def clear(self, x, y):
         self.grid[x][y] = 0
+    
+    def get_block(self, x, y):
+        return self.grid[x][y]
 
     def drawTiles(self, screen, squareSize, screenSize):
         for x in range(len(self.grid)):
             for y in range(len(self.grid[x])):
                 top = False
                 bottom = False
-                if self.grid[x][y] == 1:
+                if self.grid[x][y] != 0:
                     if y == 0 or self.grid[x][y-1] == 0:
                         top = True
                     if y == (screenSize[1]/squareSize)-1 or self.grid[x][y+1] == 0:
@@ -54,10 +60,10 @@ class Map:
                     else:
                         screen.blit(wall_images["middle"], (x*squareSize, y*squareSize))
                     
-
     def findPath(self):
         self.path = pathfinder.astar(self.grid, self.start, self.end)
-        self.setPath(self.path)
+        if self.path is not False:
+            self.setPath(self.path)
         return self.path
 
     def drawPath(self, screen, colour, squareSize):
