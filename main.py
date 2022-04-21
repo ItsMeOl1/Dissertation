@@ -12,7 +12,7 @@ clock = pygame.time.Clock()
 timePassed = 0
 
 ##CONSTANTS 
-FPS_font = pygame.font.SysFont("Arial", 10)
+FPS_font = pygame.font.SysFont("Arial", 13)
 mouseposSurface = pygame.Surface((squareSize, squareSize))
 mouseposSurface.fill((255,0,0))
 mouseposSurface.set_alpha(15)
@@ -30,6 +30,13 @@ def drawFPS():
     text = str(int(clock.get_fps()))
     fps = FPS_font.render(text, 0, pygame.Color("white"))
     screen.blit(fps, (0, 0))
+
+def drawRound():
+    text = Round.name
+    text = FPS_font.render(text, 0, pygame.Color("white"))
+    rect = text.get_rect()
+    roundText = pygame.transform.scale(text, (rect.w * 5, rect.h * 5))
+    screen.blit(roundText, (100, -10))
 
 def drawBackground():
     #screen.fill(dark_gray)
@@ -110,12 +117,12 @@ while RUNNING:
         bullets.update(screen, enemies, ticks)
         newEnemy = Round.update(ticks)
         if newEnemy == "1":
-            print("yay this works")
             enemy.Squirrel((0,0), enemies)
 
         screen.blit(mouseposSurface, (int(mousePos[0]/squareSize)*squareSize, int(mousePos[1]/squareSize)*squareSize, squareSize, squareSize))
         UI.draw(screen)
 
         drawFPS()
+        drawRound()
 
         pygame.display.flip()

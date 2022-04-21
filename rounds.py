@@ -3,7 +3,7 @@ import csv
 class Round:
     roundNo = 0
     def __init__(self, delay, buildDelay, name, enemies):
-        self.roundNo += 1
+        Round.roundNo += 1
         self.delay = int(delay)
         self.enemyList = enemies
         self.buildTime = int(buildDelay)
@@ -14,7 +14,6 @@ class Round:
         self.nextEnemy -= ticks
         print(self.nextEnemy, bool(self.enemyList))
         if self.nextEnemy < 1 and len(self.enemyList) > 0:
-            print("this far")
             self.nextEnemy = self.delay
             return self.enemyList.pop(0)
         else:

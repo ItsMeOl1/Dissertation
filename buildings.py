@@ -93,7 +93,7 @@ class BasicTower(Tower):
         self.type = "Basic"
         self.range = 1000
         self.attack_damage = 1
-        self.attack_speed = 1
+        self.attack_speed = 15
         self.attack_cd = 50
         self.towerGunImage = self.towerTurret
         self.towerGunRect = self.towerGunImage.get_rect()
