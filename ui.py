@@ -6,7 +6,7 @@ class UI:
         self.open_amount = 0
         self.open_speed = 1.3
         self.xoffset = 0
-        self.selected = None
+        self.selected = "wall"
 
         self.image = pygame.transform.scale(pygame.image.load("Sprites/UI/MenuBG.png"), (100,900))
         self.rect = self.image.get_rect()
@@ -34,6 +34,8 @@ class UI:
                         Button(towerButtonImage, towerButtonHover, towerButtonPress, towerButtonPress, (1650,200), 15, "tower1"),
                         Button(bombButtonImage, bombButtonHover, bombButtonPress, bombButtonPress, (1650,800), 15, "bomb")]
 
+        self.buttons[1].set_press(True)
+
     def collision(self, mousePos):
         onMenu = False
         if self.buttons[0].get_hit(mousePos):
@@ -45,14 +47,16 @@ class UI:
     def updateClick(self, mousePos):
         for button in self.buttons:
             if button.get_hit(mousePos):
-                button.set_press(not button.pressed)
                 info = button.info()
                 if info[1] == "open":
-                    self.open = info[0]
-                elif info[0]:
-                    self.selected = info[1]
+                    self.open = not self.open
+                    button.set_press(not button.pressed)
                 else:
-                    self.selected = None
+                    for i in self.buttons:
+                        if i.info()[1] != "open":
+                            i.set_press(False)
+                    button.set_press(True)
+                    self.selected = info[1]
         
         return self.collision(mousePos)
 
