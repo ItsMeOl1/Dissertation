@@ -1,40 +1,42 @@
-import pygame, enemy, buildings, map, ui
+import pygame, enemy, buildings, map, ui, rounds
 pygame.init()
 
-##SETTING UP THE DISPLAY
+##DISPLAY SET UP
 screenSize = 1600, 900 
 squareSize = 50 #32x18
-RUNNING = True
 screen = pygame.display.set_mode(screenSize)
-clock = pygame.time.Clock()
 
-##COLOUR CONSTANTS 
-red = 255,0,0
-green = 0,255,0
-FPS_font = pygame.font.SysFont("Arial", 10)
+##SET UP
+RUNNING = True
+clock = pygame.time.Clock()
+timePassed = 0
+
+##CONSTANTS 
+FPS_font = pygame.font.SysFont("Arial", 13)
 mouseposSurface = pygame.Surface((squareSize, squareSize))
-mouseposSurface.fill(red)
+mouseposSurface.fill((255,0,0))
 mouseposSurface.set_alpha(15)
 background = pygame.image.load("Sprites/Floors/grass.png")
 background = pygame.transform.scale(background, (1600,900))
 
-##SET UP SPRITE GROUPS
+##SPRITE GROUPS
 enemies = pygame.sprite.Group()
-enemy.Squirrel((0,0), enemies)
+enemy.Squirrel((0,0), enemies) #remove later
 
 towers = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-
-def drawOutlines(screen, colour, squareSize, screenSize):
-    for x in range(squareSize, screenSize[0], squareSize):
-        pygame.draw.line(screen, colour, (x, 0), (x, screenSize[1]))
-    for y in range(squareSize, screenSize[1], squareSize):
-        pygame.draw.line(screen, colour, (0, y), (screenSize[0], y))
 
 def drawFPS():
     text = str(int(clock.get_fps()))
     fps = FPS_font.render(text, 0, pygame.Color("white"))
     screen.blit(fps, (0, 0))
+
+def drawRound():
+    text = Round.name
+    text = FPS_font.render(text, 0, pygame.Color("white"))
+    rect = text.get_rect()
+    roundText = pygame.transform.scale(text, (rect.w * 5, rect.h * 5))
+    screen.blit(roundText, (100, -10))
 
 def drawBackground():
     #screen.fill(dark_gray)
@@ -47,6 +49,30 @@ def drawBackground():
 
     screen.blit(background, (0,0))
 
+def mouseClick(mousePos):
+    xblock = int(mousePos[0]/squareSize)
+    yblock = int(mousePos[1]/squareSize)
+    if UI.selected == "wall":
+        levelmap.place(xblock, yblock)
+        if not levelmap.findPath():
+            levelmap.clear(xblock, yblock)
+            levelmap.findPath()
+    elif levelmap.get_block(xblock, yblock) == 1: ##if clicked on a wall
+        if UI.selected == "bomb":
+            levelmap.clear(xblock, yblock)
+        elif UI.selected == "tower1":
+            buildings.BasicTower(towers, (xblock*squareSize, yblock*squareSize))
+            levelmap.place(xblock, yblock, 2)
+    elif levelmap.get_block(xblock, yblock) > 1:
+        if UI.selected == "bomb":
+            for tower in towers:
+                if tower.rect.collidepoint(mousePos):
+                    tower.kill()
+                    break
+            levelmap.clear(xblock, yblock)
+
+Round = rounds.get_next_round()
+
 UI = ui.UI()
 
 levelmap = map.Map(int(screenSize[0]/squareSize), int(screenSize[1]/squareSize))
@@ -54,78 +80,49 @@ levelmap.setPath()
 
 while RUNNING:
     clock.tick()
+    timePassed += clock.get_time()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             pygame.quit()
             RUNNING = False
 
-    
         elif event.type == pygame.MOUSEBUTTONDOWN:
              UI.updateClick(event.pos)
 
-
-        #     elif event.key == pygame.K_t:
-        #         buildings.BasicTower(towers, (int(pos[0]/squareSize)*squareSize, int(pos[1]/squareSize)*squareSize))
-        #         pos = pygame.mouse.get_pos()
-        #         levelmap.place(int(pos[0]/squareSize), int(pos[1]/squareSize))
-        #         levelmap.findPath()
-
-
-        # elif event.type == pygame.MOUSEBUTTONUP:
-        #     if not UI.updateClick(event.pos): #if not clicking on UI
-        #         if event.button == 1: #if left click
-        #             levelmap.place(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-        #             levelmap.findPath()
-        #         elif event.button == 3: #if right click
-        #             levelmap.clear(int(event.pos[0]/squareSize), int(event.pos[1]/squareSize))
-        #             levelmap.findPath()
-
     if RUNNING: #If 'x' button not clicked
-
         keys = pygame.key.get_pressed()
         mouseButtons = pygame.mouse.get_pressed()
         mousePos = pygame.mouse.get_pos()
 
         if mouseButtons[0] and not UI.collision(mousePos):
-            if UI.selected is not None: 
-                xblock = int(event.pos[0]/squareSize)
-                yblock = int(event.pos[1]/squareSize)
-                if UI.selected == "wall":
-                    levelmap.place(xblock, yblock)
-                    if not levelmap.findPath():
-                        levelmap.clear(xblock, yblock)
-                        levelmap.findPath()
-                elif levelmap.get_block(xblock, yblock) == 1: ##if clicked on a wall
-                    if UI.selected == "bomb":
-                        levelmap.clear(xblock, yblock)
-                    elif UI.selected == "tower1":
-                        buildings.BasicTower(towers, (xblock*squareSize, yblock*squareSize))
-                        levelmap.place(xblock, yblock, 2)
-                elif levelmap.get_block(xblock, yblock) > 1:
-                    if UI.selected == "bomb":
-                        for tower in towers:
-                            print(tower.rect.center)
-                            if tower.rect.collidepoint(mousePos):
-                                tower.kill()
-                                break
-                        levelmap.clear(xblock, yblock)
+                if UI.selected is not None: 
+                    mouseClick(mousePos)
+
+        if not enemies and not Round.enemyList:
+            Round = rounds.get_next_round()
 
         drawBackground()
         levelmap.drawTiles(screen,squareSize, screenSize)
-        #drawOutlines(screen, (0,0,0) , squareSize, screenSize)
-        levelmap.drawPath(screen, green, squareSize)
-        
-        
+        levelmap.drawPath(screen, (0,255,0), squareSize)
 
-        enemies.update(screen)
-        towers.update(screen, bullets, enemies)
-        screen.blit(mouseposSurface, (int(mousePos[0]/squareSize)*squareSize, int(mousePos[1]/squareSize)*squareSize, squareSize, squareSize))
+        ticks = 0
+        while timePassed >= 50:
+            timePassed -= 50
+            ticks += 1
 
-        bullets.update(screen, enemies)
-
+        enemies.update(screen, ticks)
+        towers.update(screen, bullets, enemies, ticks)
         UI.update(mousePos)
+        bullets.update(screen, enemies, ticks)
+        newEnemy = Round.update(ticks)
+        if newEnemy == "1":
+            enemy.Squirrel((0,0), enemies)
+
+        screen.blit(mouseposSurface, (int(mousePos[0]/squareSize)*squareSize, int(mousePos[1]/squareSize)*squareSize, squareSize, squareSize))
         UI.draw(screen)
 
         drawFPS()
+        drawRound()
 
         pygame.display.flip()

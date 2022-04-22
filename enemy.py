@@ -12,10 +12,6 @@ class Enemy(sprite.Sprite):
         self.speed = 1
         self.direction = 3 #8-direction with 1 being up
 
-    def update(self, screen):
-        self.move()
-        self.draw(screen)
-
     def move(self):
         if self.atDestination():
             self.nextDestination += 1
@@ -125,21 +121,26 @@ class Squirrel(Enemy):
         self.nextFrame = self.animationCD
         self.frameOrder = [0, 1, 2, 1]
         self.frame = 0
-        self.speed = 0.3
+        self.speed = 3
         self.setDirection(3)
 
     def getImage(self):
         self.image = self.images[self.direction][self.frameOrder[self.frame]]
     
-    def update(self, screen):
-        self.nextFrame -= 1
-        if self.nextFrame < 1:
-            self.nextFrame = self.animationCD
+    def update(self, screen, ticks):
+        while ticks > 0:
+            self.move()
+            ticks -= 1
+            self.nextFrame -= 1
+
+        while self.nextFrame < 1:
+            self.nextFrame += self.animationCD
             self.frame += 1
             if self.frame >= len(self.frameOrder):
                 self.frame = 0
             self.getImage()
-        super().update(screen)
+
+        self.draw(screen)
     
     def draw(self, screen):
         screen.blit(self.shadow, self.rect.topleft)
