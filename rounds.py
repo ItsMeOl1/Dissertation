@@ -12,7 +12,6 @@ class Round:
     
     def update(self, ticks):
         self.nextEnemy -= ticks
-        print(self.nextEnemy, bool(self.enemyList))
         if self.nextEnemy < 1 and len(self.enemyList) > 0:
             self.nextEnemy = self.delay
             return self.enemyList.pop(0)
