@@ -12,7 +12,7 @@ HeapQ is automatically installed with python 3, but Pygame will need to be added
 
 ## What is Just Another Tower Defence?
 
-Just Another Tower Defence (or JATD for short) is my university dissertation prject, in which I have made this game
+Just Another Tower Defence (or JATD for short) is my university dissertation project, in which I have made this game
 
 In this game you must fend off wave after wave of enemies to protect your home town
 
