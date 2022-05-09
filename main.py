@@ -71,6 +71,7 @@ def mouseClick(mousePos):
                     tower.kill()
                     break
             levelmap.clear(xblock, yblock)
+            levelmap.findPath()
 
 
 # INITIALISING GAME OBJECTS
