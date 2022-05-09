@@ -56,22 +56,23 @@ def mouseClick(mousePos):
         levelmap.place(xblock, yblock)
         if not levelmap.findPath():  # If new wall is blocking the path completely
             levelmap.clear(xblock, yblock)
-            levelmap.findPath()
+            levelmap.setPath()
     elif levelmap.get_block(xblock, yblock) == 1:  # If clicked on a wall
         if UI.selected == "bomb":
             levelmap.clear(xblock, yblock)
+            levelmap.setPath()
         elif UI.selected == "tower1":
             buildings.BasicTower(
                 towers, (xblock*squareSize, yblock*squareSize))
             levelmap.place(xblock, yblock, 2)
-    elif levelmap.get_block(xblock, yblock) > 1:  # If clkicked on a tower
+    elif levelmap.get_block(xblock, yblock) > 1:  # If clicked on a tower
         if UI.selected == "bomb":
             for tower in towers:
                 if tower.rect.collidepoint(mousePos):
                     tower.kill()
                     break
             levelmap.clear(xblock, yblock)
-            levelmap.findPath()
+            levelmap.setPath()
 
 
 # INITIALISING GAME OBJECTS
