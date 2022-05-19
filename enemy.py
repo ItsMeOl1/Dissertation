@@ -13,23 +13,28 @@ class Enemy(sprite.Sprite):
         self.nextDestination = 0  # Index of self.path this instace is heading towards
         self.speed = 1
         self.direction = 3  # 8-direction with 1 being up
+        self.finished = False
 
     def move(self):
         if self.atDestination():
             self.nextDestination += 1
             if self.nextDestination >= len(self.path):
-                self.atEnd()
+                self.finished = True
+                if self.rect.x > 1600 or self.rect.y > 900:
+                    self.atEnd()
+                else:
+                    self.go(self.speed)
             else:
                 self.getDirection()
+        elif self.finished and (self.rect.x > 1600 or self.rect.y > 900):
+            self.kill()
+            return True
         else:
             if self.direction in [2, 4, 6, 8]:
                 self.go(self.speed * 0.7)
             else:
                 self.go(self.speed)
 
-    def atEnd(self):
-        # Player taking damage goes here
-        self.kill()
 
     def go(self, distance):
         if self.direction in [2, 3, 4]:  # if going right
@@ -68,6 +73,8 @@ class Enemy(sprite.Sprite):
         self.getImage()
 
     def atDestination(self):
+        if self.finished:
+            return False
         if self.direction in [2, 3, 4]:  # if going right
             if self.rect.centerx >= self.path[self.nextDestination][0]*50 + 25:
                 return True
@@ -134,7 +141,7 @@ class Squirrel(Enemy):
         self.nextFrame = self.animationCD
         self.frameOrder = [0, 1, 2, 1]
         self.frame = 0
-        self.speed = 3
+        self.speed = 2
         self.setDirection(3)
 
     def getImage(self):
@@ -142,7 +149,8 @@ class Squirrel(Enemy):
 
     def update(self, screen, ticks):
         while ticks > 0:
-            self.move()
+            if self.move():
+                return True # taken damage
             ticks -= 1
             self.nextFrame -= 1
 
@@ -154,6 +162,7 @@ class Squirrel(Enemy):
             self.getImage()
 
         self.draw(screen)
+        return False
 
     def draw(self, screen):
         screen.blit(self.shadow, self.rect.topleft)

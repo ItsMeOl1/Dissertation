@@ -2,6 +2,8 @@ from pygame import sprite, transform
 from pygame import image as pyimage
 from math import atan, degrees, sqrt
 
+from enemy import Enemy
+
 
 class Tower(sprite.Sprite):
     image = pyimage.load("Sprites/Towers/tower.png")
@@ -60,8 +62,10 @@ class Bullet(sprite.Sprite):
         self.movement = (dx, dy)
 
     def update(self, screen, enemyGroup, ticks):
+        killed = False
         while ticks > 0:
-            self.move(enemyGroup)
+            if self.move(enemyGroup) != False:
+                killed = True
             ticks -= 1
         if self.rect.centerx < -50 or self.rect.centerx > 1650:  # If offscreen X
             self.kill()
@@ -69,6 +73,7 @@ class Bullet(sprite.Sprite):
             self.kill()
         if self.alive():
             self.draw(screen)
+        return killed
 
     def move(self, enemyGroup):
         for i in range(0, self.speed):  # For each pixel moved
@@ -79,7 +84,8 @@ class Bullet(sprite.Sprite):
                 if enemy.rect.colliderect(self.rect):
                     self.kill()
                     enemy.kill()
-                    return enemy
+                    return True
+        return False
 
     def kill(self):
         # Extra bullet hit proccessing can go here (i.e. explosions etc)
@@ -100,7 +106,7 @@ class BasicTower(Tower):
         self.type = "Basic"
         self.range = 1000
         self.attack_damage = 1
-        self.attack_speed = 15
+        self.attack_speed = 5
         self.attack_cd = 50
         self.towerGunImage = self.towerTurret
         self.towerGunRect = self.towerGunImage.get_rect()
